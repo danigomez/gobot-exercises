@@ -10,19 +10,26 @@ import (
 func main() {
 
 	firmataAdaptor := firmata.NewAdaptor("/dev/ttyACM0")
-	connection := gobot.Connection(firmataAdaptor)
+
 	pins := []*gpio.DirectPinDriver{
-		gpio.NewDirectPinDriver(connection, "2"),
-		gpio.NewDirectPinDriver(connection, "3"),
-		gpio.NewDirectPinDriver(connection, "4"),
-		gpio.NewDirectPinDriver(connection, "5"),
-		gpio.NewDirectPinDriver(connection, "6"),
-		gpio.NewDirectPinDriver(connection, "7"),
-		gpio.NewDirectPinDriver(connection, "8"),
-		gpio.NewDirectPinDriver(connection, "9"),
+		gpio.NewDirectPinDriver(firmataAdaptor, "2"),
+		gpio.NewDirectPinDriver(firmataAdaptor, "3"),
+		gpio.NewDirectPinDriver(firmataAdaptor, "4"),
+		gpio.NewDirectPinDriver(firmataAdaptor, "5"),
+		gpio.NewDirectPinDriver(firmataAdaptor, "6"),
+		gpio.NewDirectPinDriver(firmataAdaptor, "7"),
+		gpio.NewDirectPinDriver(firmataAdaptor, "8"),
+		gpio.NewDirectPinDriver(firmataAdaptor, "9"),
 	}
 
-	sevenSegment := sevensegment.NewDisplay(pins)
+	work := func() {
+		sevenSegment := sevensegment.NewDisplay(pins)
+		sevenSegment.Print([]string{"A", "B", "C", "DP"})
+	}
 
-	sevenSegment.Print([]string{"A", "B"})
+	robot := gobot.NewRobot("bot",
+		[]gobot.Connection{firmataAdaptor},
+		work)
+
+	robot.Start()
 }

@@ -16,12 +16,22 @@ func NewDisplay(pins []*gpio.DirectPinDriver) SevenSegment {
 	if len(pins) != len(segments) {
 		log.Fatalf("You only entered %v pins, the required segments are %s", len(pins), segments)
 	}
-	return SevenSegment{pins}
+	display := SevenSegment{pins}
+	display.clear()
+	return display
 }
 
 func (display SevenSegment) Print(segments []string)  {
 	for _, segment := range segments {
-		log.Print(segment)
+		selectedPin, err := display.getPinForSegment(segment)
+
+		if err != nil {
+			log.Printf("There was an error processing segment %s", segment)
+			log.Print(err.Error())
+			continue
+		}
+
+		selectedPin.Off()
 	}
 }
 
@@ -34,7 +44,6 @@ func (display SevenSegment) getPinForSegment(segment string) (pin *gpio.DirectPi
 			break
 		}
 	}
-
 	if index != -1 {
 		pin = display.Pins[index]
 	} else {
@@ -43,6 +52,18 @@ func (display SevenSegment) getPinForSegment(segment string) (pin *gpio.DirectPi
 
 	return pin, err
 
+}
 
+func (display SevenSegment) clear()  {
+	for _, segment := range segments {
+		selectedPin, err := display.getPinForSegment(segment)
 
+		if err != nil {
+			log.Printf("There was an error processing segment %s", segment)
+			log.Print(err.Error())
+			continue
+		}
+
+		selectedPin.On()
+	}
 }
